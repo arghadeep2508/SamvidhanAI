@@ -273,4 +273,49 @@ border-radius:50%;
 background:radial-gradient(circle, rgba(255,210,80,0.55) 0%, rgba(255,210,80,0.25) 35%, rgba(255,210,80,0.1) 55%, transparent 70%);
 filter:blur(8px);
 z-index:-1;
+
+}
+
+/* Mobile Responsive Fix */
+@media (max-width: 768px) {
+
+body{
+    padding:10px;
+}
+
+.container{
+    width:100%;
+    padding:15px;
+}
+
+.chat-container{
+    flex-direction:column;
+}
+
+.sidebar{
+    width:100%;
+    margin-bottom:10px;
+}
+
+.history{
+    max-height:150px;
+    overflow-y:auto;
+}
+
+.chat-box{
+    width:100%;
+}
+
+.message{
+    max-width:90%;
+}
+
+input{
+    width:100%;
+}
+
+.send-btn{
+    padding:10px 14px;
+}
+
 }
