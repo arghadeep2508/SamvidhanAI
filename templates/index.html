@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 
-<!-- MOBILE RESPONSIVE TAG -->
+<!-- MOBILE RESPONSIVE -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>SamvidhanAI</title>
@@ -39,6 +39,13 @@
 <input id="user-input"
 placeholder="Ask about Constitution (Example: Article 21, police arrest rights...)">
 <button id="send-btn">Send</button>
+</div>
+
+<!-- LEGAL WARNING -->
+<div class="legal-warning">
+⚠️ SamvidhanAI provides simplified educational explanations of the Constitution of India. 
+AI responses may contain errors and should not be treated as legal advice. 
+Always verify information from official government sources or consult a qualified lawyer before taking legal action.
 </div>
 
 </div>
@@ -203,7 +210,11 @@ localStorage.setItem("samvidhan_chats", JSON.stringify(chats))
 
 chat.innerHTML=""
 
-addBotMessage("Hello. I am SamvidhanAI — your assistant for understanding the Constitution of India.")
+/* STARTUP DISCLAIMER MESSAGE */
+
+addBotMessage(
+"Hello. I am SamvidhanAI — an educational AI assistant for understanding the Constitution of India.\n\n⚠️ Important: My responses are simplified explanations and may not always be fully accurate. This platform does not provide legal advice. Always verify constitutional information from official government sources or consult a qualified lawyer."
+)
 
 renderHistory()
 }
@@ -254,8 +265,6 @@ div.className = "history-item"
 div.innerText = c.title
 
 div.onclick = () => loadChat(index)
-
-/* DOUBLE CLICK TO RENAME */
 
 div.ondblclick = () => renameChat(index)
 
