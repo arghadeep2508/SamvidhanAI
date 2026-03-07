@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SamvidhanAI</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+<div class="app-container">
+<div class="chat-app">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+<h3>History</h3>
+<button class="new-chat" onclick="newChat()">+ New Chat</button>
+<div id="history" class="history"></div>
+</div>
+
+<!-- CHAT AREA -->
+<div class="chat-main">
+
+<div class="chat-header">
+<img src="/static/logo.png" class="logo">
+<div>
+<div class="title">SamvidhanAI</div>
+<div class="subtitle">Constitution Assistant</div>
+</div>
+</div>
+
+<div id="chat" class="chat"></div>
+
+<div class="input-area">
+<input id="user-input"
+placeholder="Ask about Constitution (Example: Article 21, police arrest rights...)">
+<button id="send-btn">Send</button>
+</div>
+
+</div>
+</div>
+</div>
+
+<footer class="site-footer">
+<div>
+© 2026 SamvidhanAI — Educational AI assistant for understanding the Constitution of India.
+</div>
+<div class="footer-links">
+<a href="/how-to-use">How to Use</a>
+<a href="/privacy">Privacy Policy</a>
+<a href="/terms">Terms</a>
+<a href="/contact">Contact</a>
+</div>
+</footer>
+
+<script>
+
+/* ELEMENTS */
+
+const chat = document.getElementById("chat")
+const input = document.getElementById("user-input")
+const sendBtn = document.getElementById("send-btn")
+
+/* STORAGE */
+
+let chats = JSON.parse(localStorage.getItem("samvidhan_chats")) || []
+let currentChat = null
+
+/* SCROLL */
+
+function scrollDown(){
+chat.scrollTop = chat.scrollHeight
+}
+
+/* USER MESSAGE */
+
+function addUserMessage(text){
+
+const row = document.createElement("div")
+row.className = "user-row"
+
+const bubble = document.createElement("div")
+bubble.className = "user-bubble"
+bubble.innerText = text
+
+row.appendChild(bubble)
+chat.appendChild(row)
+
+scrollDown()
+}
+
+/* BOT MESSAGE */
+
+function addBotMessage(text){
+
+const row = document.createElement("div")
+row.className = "bot-row"
+
+const bubble = document.createElement("div")
+bubble.className = "bot-bubble"
+bubble.innerText = text
+
+const copy = document.createElement("button")
+copy.className = "copy-btn"
+copy.innerText = "Copy"
+
+copy.onclick = () => navigator.clipboard.writeText(text)
+
+bubble.appendChild(document.createElement("br"))
+bubble.appendChild(copy)
+
+row.appendChild(bubble)
+chat.appendChild(row)
+
+scrollDown()
+}
+
+/* TYPING */
+
+function showTyping(){
+
+const row = document.createElement("div")
+row.className = "bot-row"
+row.id = "typing"
+
+const bubble = document.createElement("div")
+bubble.className = "bot-bubble"
+bubble.innerText = "Typing..."
+
+row.appendChild(bubble)
+
+chat.appendChild(row)
+
+scrollDown()
+}
+
+function removeTyping(){
+const t = document.getElementById("typing")
+if(t) t.remove()
+}
+
+/* SEND MESSAGE */
+
+async function sendMessage(){
+
+const question = input.value.trim()
+
+if(!question) return
+
+addUserMessage(question)
+
+input.value = ""
+
+showTyping()
+
+try{
+
+const response = await fetch(`/api/ask?q=${encodeURIComponent(question)}`)
+const data = await response.json()
+
+removeTyping()
+
+addBotMessage(data.answer)
+
+/* SAVE MESSAGE */
+
+if(currentChat){
+
+currentChat.messages.push({ role:"user", text:question })
+currentChat.messages.push({ role:"bot", text:data.answer })
+
+if(currentChat.title === "New Chat"){
+currentChat.title = question.substring(0,30)
+}
+
+localStorage.setItem("samvidhan_chats", JSON.stringify(chats))
+renderHistory()
+}
+
+}catch(err){
+
+removeTyping()
+addBotMessage("Server error. Please try again.")
+}
+}
+
+/* NEW CHAT */
+
+function newChat(){
+
+currentChat = {
+title:"New Chat",
+messages:[]
+}
+
+chats.unshift(currentChat)
+
+localStorage.setItem("samvidhan_chats", JSON.stringify(chats))
+
+chat.innerHTML=""
+
+addBotMessage("Hello. I am SamvidhanAI — your assistant for understanding the Constitution of India.")
+
+renderHistory()
+}
+
+/* LOAD CHAT */
+
+function loadChat(index){
+
+currentChat = chats[index]
+
+chat.innerHTML=""
+
+currentChat.messages.forEach(msg=>{
+
+if(msg.role === "user"){
+addUserMessage(msg.text)
+}else{
+addBotMessage(msg.text)
+}
+
+})
+}
+
+/* RENAME CHAT */
+
+function renameChat(index){
+
+let newName = prompt("Rename chat:", chats[index].title)
+
+if(newName && newName.trim() !== ""){
+chats[index].title = newName.trim()
+localStorage.setItem("samvidhan_chats", JSON.stringify(chats))
+renderHistory()
+}
+}
+
+/* HISTORY */
+
+function renderHistory(){
+
+const box = document.getElementById("history")
+box.innerHTML=""
+
+chats.forEach((c,index)=>{
+
+const div = document.createElement("div")
+div.className = "history-item"
+div.innerText = c.title
+
+div.onclick = () => loadChat(index)
+
+/* DOUBLE CLICK TO RENAME */
+
+div.ondblclick = () => renameChat(index)
+
+box.appendChild(div)
+
+})
+}
+
+/* EVENTS */
+
+sendBtn.onclick = sendMessage
+
+input.addEventListener("keypress", function(e){
+if(e.key === "Enter"){
+sendMessage()
+}
+})
+
+/* INIT */
+
+renderHistory()
+
+if(chats.length === 0){
+newChat()
+}else{
+currentChat = chats[0]
+loadChat(0)
+}
+
+</script>
+
+</body>
+</html>
